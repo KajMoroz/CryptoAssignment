@@ -1,18 +1,26 @@
 import sys
 
-lastText = []
+spaceList = []
 
-def encrypt(msg,key):
+def decrypt(msg,key):
     global lastText
-    print "Decrypting"
+
+    spaces = []
+
     c = strxor(key, msg)
-    c = c.encode('utf8')
-    i = 0
-    while i+4 < c.__len__():
-        print strxor( c[i:i+4], " the ") #XOR with " the " should reveal any text between the strings that have " the " in one of them, but not the other.
-        i=i+4
+    c = c.encode("hex")
+    i=0
+    while i < len(c):
+        if int((c[i:i+2]), 16) < 65:
+            print chr(int((c[i:i+2]), 16)+97),
+        else:
+            print (int(c[i:i+2], 16)),
+            spaces.append(i)
+        i = i+2
 
     print
+
+    spaceList.append(spaces)
     return c
 
 def strxor(a, b): # xor two strings of different lengths
@@ -24,21 +32,25 @@ def strxor(a, b): # xor two strings of different lengths
 class CipherDecrypter:
 
     lastText = []
-    def strxor(a, b): # xor two strings of different lengths
-        if len(a) > len(b):
-            return "".join([chr(ord(x) ^ ord(y)) for (x, y) in zip(a[:len(b)], b)])
-        else:
-            return "".join([chr(ord(x) ^ ord(y)) for (x, y) in zip(a, b[:len(a)])])
 
-    
-    def random(size=16):
-        return open("/dev/urandom").read(size)
 
     def main(self):
         fp = open("cipherText.txt", "r")
         MSGS = fp.readlines()
+        lastMsg = []
         print "Decrypting Text"
-        ciphertexts = [encrypt(MSGS[10], msg) for msg in MSGS]
+        for msg in MSGS:
+            if lastMsg != []:
+                decrypt(msg,lastMsg)
+            lastMsg = msg
 
+        #print "Cipher 10 and 9"
+       # ciphertexts = [decrypt(MSGS[10], MSGS[9])]
+        #print "Cipher 10 and 8"
+        #ciphertexts = [decrypt(MSGS[10], MSGS[8])]
+        #print "Cipher 9 and 8"
+        #ciphertexts = [decrypt(MSGS[9], MSGS[8])]
+
+        print spaceList
 
 CipherDecrypter().main()
